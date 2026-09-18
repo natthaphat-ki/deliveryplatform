@@ -1,0 +1,56 @@
+services:
+  backend:
+    build:
+      context: ./BackEnd
+    container_name: deliveryplatform-backend
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    env_file:
+      - ./BackEnd/.env
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+
+  admin:
+    build:
+      context: ./Admin
+      args:
+        VITE_API_BASE_URL: http://localhost:4000/api
+        VITE_WS_URL: ws://localhost:4000/ws
+    container_name: deliveryplatform-admin
+    restart: unless-stopped
+    ports:
+      - "5174:80"
+    depends_on:
+      - backend
+
+  mysql:
+    image: mysql:8.4
+    container_name: deliveryplatform-mysql
+    restart: unless-stopped
+    env_file:
+      - ./BackEnd/.env
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./BackEnd/src/database/migrations:/docker-entrypoint-initdb.d:ro
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: deliveryplatform-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    env_file:
+      - ./BackEnd/.env
+    depends_on:
+      - mysql
+
+volumes:
+  mysql-data:
+
+networks:
+  default:
+    driver: bridge
