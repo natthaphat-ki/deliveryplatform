@@ -12,4 +12,14 @@ export const deliveryController = {
     const job = await deliveryService.acceptJob(Number(req.params.orderId), Number(req.user?.userId));
     res.status(200).json({ success: true, data: job });
   }),
+
+  updateJobStatus: asyncHandler(async (req: Request, res: Response) => {
+    const job = await deliveryService.updateJobStatus(Number(req.params.orderId), Number(req.user?.userId), req.body.status);
+    res.status(200).json({ success: true, data: job });
+  }),
+
+  updateProfile: asyncHandler(async (req: Request, res: Response) => {
+    const profile = await deliveryService.updateProfile(Number(req.user?.userId), req.body);
+    res.status(200).json({ success: true, data: profile });
+  }),
 };

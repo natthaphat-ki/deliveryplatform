@@ -5,6 +5,7 @@ import { restaurantRoutes } from './restaurant.routes';
 import { orderRoutes } from './order.routes';
 import { deliveryRoutes } from './delivery.routes';
 import { trackingRoutes } from './tracking.routes';
+import { weatherRoutes } from './weather.routes';
 
 export const apiRouter = Router();
 
@@ -14,3 +15,4 @@ apiRouter.use('/restaurants', restaurantRoutes);
 apiRouter.use('/orders', orderRoutes);
 apiRouter.use('/delivery', deliveryRoutes);
 apiRouter.use('/tracking', trackingRoutes);
+apiRouter.use('/weather', weatherRoutes);

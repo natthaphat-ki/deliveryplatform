@@ -19,7 +19,6 @@ export const env = {
   },
 
   externalApis: {
-    googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? '',
-    weatherApiKey: process.env.WEATHER_API_KEY ?? '',
+    longdoMapApiKey: process.env.LONGDO_MAP_API_KEY ?? '',
   },
 };
