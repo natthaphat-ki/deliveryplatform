@@ -3,8 +3,11 @@ import { asyncHandler } from '../utils/asyncHandler';
 import { restaurantService } from '../services/restaurant.service';
 
 export const restaurantController = {
-  list: asyncHandler(async (_req: Request, res: Response) => {
-    const restaurants = await restaurantService.list();
+  list: asyncHandler(async (req: Request, res: Response) => {
+    const restaurants = await restaurantService.list({
+      lat: Number(req.query.lat),
+      lng: Number(req.query.lng),
+    });
     res.status(200).json({ success: true, data: restaurants });
   }),
 

@@ -9,3 +9,4 @@ orderRoutes.post('/', authenticate, authorize('customer'), orderController.creat
 orderRoutes.get('/mine', authenticate, authorize('customer'), orderController.listMine);
 orderRoutes.get('/:id', authenticate, orderController.getById);
 orderRoutes.patch('/:id/status', authenticate, authorize('delivery', 'admin'), orderController.updateStatus);
+orderRoutes.post('/:id/rating', authenticate, authorize('customer'), orderController.rate);

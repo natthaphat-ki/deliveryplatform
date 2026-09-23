@@ -23,6 +23,8 @@ export interface CreateUserInput {
   passwordHash: string;
   phone: string;
   role: Role;
+  /** Created in the same transaction as the user (delivery role only). */
+  deliveryProfile?: { vehicleType: string; vehicleNumber: string };
 }
 
 interface UserRow extends RowDataPacket {
@@ -79,16 +81,35 @@ export const userService = {
   },
 
   async create(input: CreateUserInput): Promise<SafeUser> {
-    const [result] = await pool.query<ResultSetHeader>(
-      `INSERT INTO users (role_id, name, email, password_hash, phone)
-       SELECT role_id, ?, ?, ?, ? FROM roles WHERE role_name = ?`,
-      [input.name, input.email, input.passwordHash, input.phone, input.role]
-    );
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
 
-    if (result.affectedRows === 0) {
-      throw new ApiError(400, `Unknown role: ${input.role}`);
+      const [result] = await connection.query<ResultSetHeader>(
+        `INSERT INTO users (role_id, name, email, password_hash, phone)
+         SELECT role_id, ?, ?, ?, ? FROM roles WHERE role_name = ?`,
+        [input.name, input.email, input.passwordHash, input.phone, input.role]
+      );
+
+      if (result.affectedRows === 0) {
+        throw new ApiError(400, `Unknown role: ${input.role}`);
+      }
+
+      if (input.deliveryProfile) {
+        await connection.execute<ResultSetHeader>(
+          `INSERT INTO delivery_profiles (user_id, vehicle_type, vehicle_number, availability_status)
+           VALUES (?, ?, ?, 'available')`,
+          [result.insertId, input.deliveryProfile.vehicleType, input.deliveryProfile.vehicleNumber]
+        );
+      }
+
+      await connection.commit();
+      return userService.findById(result.insertId);
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
     }
-
-    return userService.findById(result.insertId);
   },
 };

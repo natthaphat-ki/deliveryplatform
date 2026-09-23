@@ -11,6 +11,8 @@ export interface RegisterInput {
   password: string;
   phone: string;
   role: 'customer' | 'delivery';
+  vehicleType?: string;
+  vehicleNumber?: string;
 }
 
 export interface LoginInput {
@@ -35,6 +37,9 @@ function assertRegisterInput(input: Partial<RegisterInput>): asserts input is Re
   }
   if (input.password.length < 8) {
     throw new ApiError(400, 'รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร');
+  }
+  if (input.role === 'delivery' && (!input.vehicleType?.trim() || !input.vehicleNumber?.trim())) {
+    throw new ApiError(400, 'กรุณาระบุประเภทรถและทะเบียนรถ');
   }
 }
 
@@ -62,6 +67,10 @@ export const authService = {
       phone: input.phone,
       role: input.role,
       passwordHash,
+      deliveryProfile:
+        input.role === 'delivery'
+          ? { vehicleType: input.vehicleType!.trim(), vehicleNumber: input.vehicleNumber!.trim() }
+          : undefined,
     });
   },
 
